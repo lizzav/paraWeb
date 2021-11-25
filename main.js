@@ -66,21 +66,18 @@ const ctx = canvas.getContext("2d");
 const reader = new FileReader();
 const img = new Image();
 
+let glass = document.createElement("DIV");
+let color = document.createElement("DIV");
+glass.setAttribute("class", "img-magnifier-glass");
+color.setAttribute("class", "img-magnifier-color");
+
 function magnify() {
-  let glass,
-    color,
-    w,
+  let w,
     h,
-    zoom = 3;
-  glass = document.createElement("DIV");
-  color = document.createElement("DIV");
-  glass.setAttribute("class", "img-magnifier-glass");
-  color.setAttribute("class", "img-magnifier-color");
+    zoom = 2;
 
   canvas.parentElement.insertBefore(color, canvas);
   canvas.parentElement.insertBefore(glass, canvas);
-
-  glass.style.backgroundImage = "url('" + img.src + "')";
   glass.style.backgroundRepeat = "no-repeat";
 
   glass.style.backgroundSize =
@@ -88,8 +85,6 @@ function magnify() {
   w = glass.offsetWidth / 2;
   h = glass.offsetHeight / 2;
 
-  glass.addEventListener("mousemove", moveMagnifier);
-  color.addEventListener("mousemove", moveMagnifier);
   canvas.addEventListener("mousemove", moveMagnifier);
   canvas.addEventListener("mouseout", function() {
     glass.style.opacity = "0";
@@ -110,22 +105,22 @@ function magnify() {
     if (y < 0 || y > canvas.height || x > canvas.width || x < 0) {
       glass.style.opacity = "0";
       color.style.opacity = "0";
+    } else {
+      let pixel = ctx.getImageData(x, y, 1, 1);
+      color.style.background = rgb2hex(
+        pixel.data[0],
+        pixel.data[1],
+        pixel.data[2],
+        pixel.data[3]
+      );
+
+      color.style.left = x - w - 10 + "px";
+      color.style.top = y - h - 10 + "px";
+      glass.style.left = x - w + "px";
+      glass.style.top = y - h + "px";
+      glass.style.backgroundPosition =
+        "-" + (x * zoom - w) + "px -" + (y * zoom - h) + "px";
     }
-
-    let pixel = ctx.getImageData(x, y, 1, 1);
-    color.style.background = rgb2hex(
-      pixel.data[0],
-      pixel.data[1],
-      pixel.data[2],
-      pixel.data[3]
-    );
-
-    color.style.left = x - w - 10 + "px";
-    color.style.top = y - h - 10 + "px";
-    glass.style.left = x - w + "px";
-    glass.style.top = y - h + "px";
-    glass.style.backgroundPosition =
-      "-" + (x * zoom - w) + "px -" + (y * zoom - h) + "px";
   }
 
   function getCursorPos(e) {
@@ -145,22 +140,27 @@ function uploadImage(e) {
     img.onload = function() {
       const width = 600;
       const height = 600;
+
       let ratioX = width / img.width;
       let ratioY = height / img.height;
       let ratio = Math.min(ratioX, ratioY);
+
       canvas.width = img.width * ratio;
       canvas.height = img.height * ratio;
 
       ctx.drawImage(img, 0, 0, img.width * ratio, img.height * ratio);
-      deleteElement("img-magnifier-glass");
-      deleteElement("img-magnifier-color");
+      canvas.toBlob(function(blob) {
+        let url = URL.createObjectURL(blob);
+        glass.style.backgroundImage = "url('" + url + "')";
+      });
       magnify();
     };
-    document.getElementById("color-click_wrapper").style.display = "flex";
 
     img.src = reader.result;
-    document.getElementById("canvas_wrapper").appendChild(canvas);
   };
+  document.getElementById("canvas_wrapper").appendChild(canvas);
+  document.getElementById("color-click_wrapper").style.display = "flex";
+
   e.target ? reader.readAsDataURL(e.target.files[0]) : reader.readAsDataURL(e);
 }
 
