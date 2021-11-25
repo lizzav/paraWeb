@@ -1,17 +1,46 @@
-const reducer = (state = [], action) => {
+var __spreadArrays =
+  (this && this.__spreadArrays) ||
+  function() {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++)
+      s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+      for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+        r[k] = a[j];
+    return r;
+  };
+
+function reducer(state, action) {
+  if (typeof state === "undefined") {
+    state = [];
+  }
   switch (action.type) {
     case "ADD_COLOR": {
       const id = Math.floor(Math.random() * 100000);
-      return [{ id: id, hex: action.hex }, ...state];
+      return __spreadArrays([{ id: id, hex: action.hex }], state);
     }
     case "DELETE_COLOR": {
-      const index = state.findIndex(e => e.id === action.id);
-      return [...state.slice(0, index), ...state.slice(index + 1)];
+      let index;
+      for (let el in state) {
+        if (state[el].id === action.id) {
+          index = el;
+        }
+      }
+      return __spreadArrays(
+        state.slice(0, index),
+        state.slice(Number(index) + 1)
+      );
     }
     default:
       return state;
   }
-};
+}
+function deleteElement(className) {
+  let deleteElement = document.getElementsByClassName(className);
+  while (deleteElement.length) {
+    deleteElement[0].parentNode.removeChild(deleteElement[0]);
+  }
+}
+
 const store = Redux.createStore(reducer);
 
 function rgb2hex(r, g, b) {
@@ -31,19 +60,12 @@ let deleteSvg =
   '<path d="M8.5 7.99976V11.3599" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>\n' +
   "</svg>\n";
 
-const deleteElement = className => {
-  let deleteElement = document.getElementsByClassName(className);
-  while (deleteElement.length) {
-    deleteElement[0].parentNode.removeChild(deleteElement[0]);
-  }
-};
-
 const canvas = document.createElement("canvas");
 canvas.id = "canvas";
 const ctx = canvas.getContext("2d");
 const reader = new FileReader();
 const img = new Image();
-console.log("stuped e11");
+
 function magnify() {
   let glass,
     color,
@@ -69,7 +91,7 @@ function magnify() {
   glass.addEventListener("mousemove", moveMagnifier);
   color.addEventListener("mousemove", moveMagnifier);
   canvas.addEventListener("mousemove", moveMagnifier);
-  canvas.addEventListener("mouseout", () => {
+  canvas.addEventListener("mouseout", function() {
     glass.style.opacity = "0";
     color.style.opacity = "0";
   });
@@ -118,9 +140,9 @@ function magnify() {
   }
 }
 
-const uploadImage = e => {
-  reader.onload = () => {
-    img.onload = () => {
+function uploadImage(e) {
+  reader.onload = function() {
+    img.onload = function() {
       const width = 600;
       const height = 600;
       let ratioX = width / img.width;
@@ -140,9 +162,9 @@ const uploadImage = e => {
     document.getElementById("canvas_wrapper").appendChild(canvas);
   };
   e.target ? reader.readAsDataURL(e.target.files[0]) : reader.readAsDataURL(e);
-};
+}
 
-const verifyImg = e => {
+function verifyImg(e) {
   let arr = e.target ? e.target.files[0].name.split(".") : e.name.split(".");
   let type = arr[arr.length - 1];
 
@@ -153,11 +175,13 @@ const verifyImg = e => {
       type.toUpperCase() === "PNG"
     ) {
       uploadImage(e);
-    } else throw new Error(`${type}`);
+    } else throw new Error(type);
   } catch (e) {
-    alert(`Тип файла:${e.message} , требуется файл формата .jpg,.png,.svg.`);
+    alert(
+      "Тип файла:" + e.message + ", требуется файл формата .jpg,.png,.svg."
+    );
   }
-};
+}
 
 let dropzone = document.getElementById("dropzone");
 
@@ -165,30 +189,29 @@ dropzone.addEventListener("dragenter", function() {
   dropzone.className = "hover";
 });
 
-["drop", "dragleave"].forEach(eventName =>
+["drop", "dragleave"].forEach(function(eventName) {
   dropzone.addEventListener(eventName, function() {
     dropzone.className = "";
-  })
-);
+  });
+});
 
-["drop", "dragover"].forEach(eventName =>
+["drop", "dragover"].forEach(function(eventName) {
   dropzone.addEventListener(
     eventName,
     function(e) {
       e.preventDefault();
       e.stopPropagation();
-
       let files = e.dataTransfer.files;
-      files = [...files];
+      files = __spreadArrays(files);
       files[0] && verifyImg(files[0]);
     },
     false
-  )
-);
+  );
+});
 
 document.getElementById("uploader").addEventListener("change", verifyImg);
 
-canvas.addEventListener("click", e => {
+canvas.addEventListener("click", function(e) {
   let pixel = ctx.getImageData(e.offsetX, e.offsetY, 1, 1);
   let color = rgb2hex(
     pixel.data[0],
@@ -202,20 +225,20 @@ canvas.addEventListener("click", e => {
   });
 });
 
-store.subscribe(() => {
+store.subscribe(function() {
   deleteElement("color_item");
   const colorsWrapper = document.createElement("div");
   colorsWrapper.id = "colors_wrapper";
 
   document.getElementById("left_wrapper").appendChild(colorsWrapper);
 
-  store.getState().map(el => {
+  store.getState().map(function(el) {
     const divForColor = document.createElement("div");
     divForColor.className = "color_item";
 
     const nameColor = document.createElement("div");
     nameColor.className = "color_name";
-    nameColor.innerHTML = `HEX ${el.hex.toUpperCase()}`;
+    nameColor.innerHTML = "HEX" + el.hex.toUpperCase();
 
     const svgForColor = document.createElement("span");
     svgForColor.innerHTML = colorSvg;
@@ -230,7 +253,7 @@ store.subscribe(() => {
     divForColor.appendChild(nameColor);
     divForColor.appendChild(svgForDeleteColor);
 
-    svgForDeleteColor.addEventListener("click", () => {
+    svgForDeleteColor.addEventListener("click", function() {
       store.dispatch({
         type: "DELETE_COLOR",
         id: el.id
