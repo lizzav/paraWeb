@@ -1,0 +1,44 @@
+<! DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Выбор цвета по фото</title>
+    <link rel="stylesheet" type="text/css" href="index.css" />
+</head>
+<body>
+<div class="title">Выбор цвета по фотографии</div>
+<p class="text">
+    Загрузите фотографию понравившегося интерьера с вашего компьютера или
+    телефона, и мы поможем определить цвет.
+</p>
+
+<div class="uploader-wrapper">
+    <input type="file" id="uploader" accept=".jpg,.jpeg,.png,.svg" />
+    <label for="uploader" class="uploader_content">
+        <span class="input__file-button-text">Выберите файл</span>
+        <span class="input__file-icon-wrapper">
+          <img
+                  class="input__file-icon"
+                  src="download.svg"
+                  alt="Выбрать файл"
+                  width="25"
+          />
+        </span>
+    </label>
+
+    <span id="dropzone">Или перетяните изображение сюда</span>
+</div>
+<div class="content__wrapper">
+    <div id="canvas_wrapper"></div>
+    <div id="left_wrapper">
+        <div id="color-click_wrapper">
+            <img src="attention.svg" alt="attention" /> Кликните на фото, чтобы
+            добавить цвет
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.5/redux.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
