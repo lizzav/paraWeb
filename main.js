@@ -149,10 +149,8 @@ function uploadImage(e) {
       canvas.height = img.height * ratio;
 
       ctx.drawImage(img, 0, 0, img.width * ratio, img.height * ratio);
-      canvas.toBlob(function(blob) {
-        let url = URL.createObjectURL(blob);
-        glass.style.backgroundImage = "url('" + url + "')";
-      });
+      var url = canvas.toDataURL("image/jpeg", 1.0);
+      glass.style.backgroundImage = "url('" + url + "')";
       magnify();
     };
 
